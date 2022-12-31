@@ -72,4 +72,31 @@ WITH get_median AS (
 	) AS sq
 	GROUP BY	customer_id)
 SELECT		PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY mean_action_freq) AS median
-FROM		get_median
+FROM		get_median;
+
+
+
+-- number of orders by month
+SELECT		TO_CHAR(order_date, 'YYYY-MM') AS order_month,
+			COUNT(DISTINCT order_id) AS uniq_orders
+FROM		orders
+GROUP BY	order_month
+ORDER BY	order_month;
+
+
+
+-- TOP-5 products
+WITH units_ordered AS (
+	SELECT		product_id,
+				CEIL(SUM(unit_price * quantity)) AS product_revenue
+	FROM		order_details
+	GROUP BY	product_id
+	ORDER BY	product_revenue DESC
+	LIMIT 5
+)
+SELECT		products.product_name AS product_name,
+			units_ordered.product_revenue AS revenue
+FROM		products
+JOIN		units_ordered
+ON			products.product_id = units_ordered.product_id
+ORDER BY	revenue DESC;
