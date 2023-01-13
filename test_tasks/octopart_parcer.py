@@ -3,6 +3,7 @@ import numpy as np
 import base64
 import requests
 import time
+import json
 
 
 class OctopartParser:
@@ -12,7 +13,7 @@ class OctopartParser:
 
 
     def __init__(self, client_id :str, client_secret :str):
-        #         initialize session
+        #  initialize session
         self.client_id = client_id
         self.client_secret = client_secret
         self.token = self.get_token()
@@ -24,7 +25,7 @@ class OctopartParser:
 
 
 
-        # func to get access_token
+    # func to get access_token
     def get_token(self):
 
         try:
@@ -43,7 +44,7 @@ class OctopartParser:
 
         return token
 
-    # func to capture start session time
+    # func to capture session start time
     def get_time(self):
 
         decoded_token = json.loads(
@@ -52,7 +53,7 @@ class OctopartParser:
 
         return decoded_token
 
-
+    # func to check expiration time of the token-key
     def check_expiration(self):
 
         if self.session_time < (time.time() + 300):
@@ -60,7 +61,7 @@ class OctopartParser:
             self.session.headers.update({"token": self.token.get('access_token')})
             self.session_time = get_time()
 
-
+    # func to perform query
     def get_query(self, query :str, variables :dict):
 
         try:
@@ -82,7 +83,7 @@ class OctopartParser:
         return response["data"]
 
 
-
+    # func to get all octopart categories
     def get_all_categories(self, file_name :str, variables=None):
 
         QUERY_CATEGORIES = '''
@@ -110,7 +111,7 @@ class OctopartParser:
 
         return categories
 
-
+    # func to get all available manufacturers on octopart.com
     def get_all_manufacturers(self, file_name, variables=None):
         QUERY_MANUFACTURERS = '''
         query Manufacturers {
@@ -130,6 +131,7 @@ class OctopartParser:
 
         return manufacturers
 
+    # func to get all attributes
     def get_all_attributes(self, file_name, variables=None):
         QUERY_ATTRIBUTES = '''
         query Attributes {
@@ -150,6 +152,7 @@ class OctopartParser:
 
         return attributes
 
+    # func to obtain info about all sellers on octopart.com
     def get_all_sellers(self, file_name, variables=None):
         QUERY_SELLERS = '''
         query Sellers {
@@ -169,7 +172,7 @@ class OctopartParser:
 
         return sellers
 
-
+    # if you want get some particular part-info
     def get_parts_by_id(self, variables :list, file_name):
         QUERY_PARTS = '''
         query Parts ($ids: [String!]!) {
