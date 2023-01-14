@@ -172,31 +172,50 @@ class OctopartParser:
 
         return sellers
 
+
     # if you want get some particular part-info
-    def get_parts_by_id(self, variables :list, file_name):
-        QUERY_PARTS = '''
-        query Parts ($ids: [String!]!) {
-          supParts(ids: $ids) {
-            category{
-              id
-              name
-            }
-            id
-            manufacturer {
-              id
-              name
+    def get_parts_by_query(self, q:str, start:int, file_name:str, limit=100):
+        QUERY_PARTS_Q = '''
+        query Search ($q: String, $start: Int!, $limit: Int!) {
+          supSearch (
+            q: $q
+            start: $start
+            limit: $limit) {
+            results{
+              description
+              part{
+                category{
+                  id
+                }
+                estimatedFactoryLeadDays
+                id
+                manufacturer{
+                  id
+                }
+                medianPrice1000{
+                    convertedPrice
+                  conversionRate
+                  convertedCurrency
+                  currency
+                  price
+                  quantity
+                }
+                mpn
+                name 
               }
-            name
-            shortDescription
             }
           }
+        }
         '''
-        assert type(variables) == list, 'The variables type should be list'
-        variables = list([str(x) for x in variables])
-        variables = {'ids': variables}
 
-        parts = data.get_query(QUERY_PARTS, variables)
-        parts = pd.DataFrame(parts['supParts'])
-        parts.to_csv(file_name, sep=',', encoding='utf-8')
+        variables = {
+            'q': q,
+            'start': start,
+            'limit': limit
+        }
 
-        return parts
+        parts_by_q = self.get_query(QUERY_PARTS_Q, variables)
+        parts_by_q = pd.DataFrame(parts_by_q['supSearch']['results'])
+        parts_by_q.to_csv(file_name, sep=',', encoding='utf-8')
+
+        return parts_by_q
